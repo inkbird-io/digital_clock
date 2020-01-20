@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,14 +16,14 @@ enum _Element {
 }
 
 final _lightTheme = {
-  _Element.background: Color(0xFF81B3FE),
+  _Element.background: Colors.blue,
   _Element.text: Colors.white,
   _Element.shadow: Colors.black,
 };
 
 final _darkTheme = {
   _Element.background: Colors.black,
-  _Element.text: Colors.white,
+  _Element.text: Colors.lightGreenAccent,
   _Element.shadow: Color(0xFF174EA6),
 };
 
@@ -78,18 +79,18 @@ class _DigitalClockState extends State<DigitalClock> {
       _dateTime = DateTime.now();
       // Update once per minute. If you want to update every second, use the
       // following code.
-      _timer = Timer(
-        Duration(minutes: 1) -
-            Duration(seconds: _dateTime.second) -
-            Duration(milliseconds: _dateTime.millisecond),
-        _updateTime,
-      );
+//      _timer = Timer(
+//        Duration(minutes: 1) -
+//            Duration(seconds: _dateTime.second) -
+//            Duration(milliseconds: _dateTime.millisecond),
+//        _updateTime,
+//      );
       // Update once per second, but make sure to do it at the beginning of each
       // new second, so that the clock is accurate.
-      // _timer = Timer(
-      //   Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
-      //   _updateTime,
-      // );
+       _timer = Timer(
+         Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
+         _updateTime,
+       );
     });
   }
 
@@ -99,35 +100,72 @@ class _DigitalClockState extends State<DigitalClock> {
         ? _lightTheme
         : _darkTheme;
     final hour =
-    DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
+        DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
     final minute = DateFormat('mm').format(_dateTime);
-    final fontSize = MediaQuery.of(context).size.width / 3.5;
-    final offset = -fontSize / 7;
+    final second = DateFormat('ss').format(_dateTime);
+    final fontSize = MediaQuery.of(context).size.width / 50;
+//    final offset = -fontSize / 7;
     final defaultStyle = TextStyle(
-      color: colors[_Element.text],
-      fontFamily: 'PressStart2P',
+//      color: colors[_Element.text],
+      color: Colors.lime,
       fontSize: fontSize,
-      shadows: [
-        Shadow(
-          blurRadius: 0,
-          color: colors[_Element.shadow],
-          offset: Offset(10, 0),
-        ),
-      ],
     );
+    final temp = widget.model.temperatureString;
+    final weatherCondition = widget.model.weatherString;
 
     return Container(
-      color: colors[_Element.background],
-      child: Center(
-        child: DefaultTextStyle(
-          style: defaultStyle,
-          child: Stack(
-            children: <Widget>[
-              Positioned(left: offset, top: 0, child: Text(hour)),
-              Positioned(right: offset, bottom: offset, child: Text(minute)),
-            ],
+      decoration: new BoxDecoration(
+        image: new DecorationImage(
+            image: new AssetImage("assets/background.jpg")
+        )
+      ),
+      child: Stack(
+        children: <Widget>[
+          // Weather display
+          Positioned(
+            bottom: 210,
+            right: 50,
+            child: Container(
+              width: 90,
+              height: 60,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      '$temp',
+                      style: TextStyle(
+                        color: _darkTheme[_Element.text]
+                      )
+                    ),
+                    Text(
+                      '$weatherCondition',
+                      style: TextStyle(
+                          color: _darkTheme[_Element.text]
+                      ),
+                    ),
+                  ],
+                )
+              ),
+            ),
           ),
-        ),
+          // Analog clock
+          Positioned(
+            bottom: 130, right: 25,
+            child: Container(
+              width: 140,
+              height: 55,
+              child: Center(
+                  child: DefaultTextStyle(
+                    style: defaultStyle,
+                    child: Text(
+                        '$hour:$minute:$second'
+                    ),
+                  ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
