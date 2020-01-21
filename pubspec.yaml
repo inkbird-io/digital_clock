@@ -11,8 +11,6 @@ dependencies:
   flutter_clock_helper:
     path: ../flutter_clock_helper
   cupertino_icons: ^0.1.2
-  gif_ani: 0.0.2
-  flutter_gifimage: ^1.0.0
 
 dev_dependencies:
   flutter_test:
@@ -23,6 +21,6 @@ flutter:
   assets:
     - assets/
   fonts:
-    - family: PressStart2P
+    - family: VT323
       fonts:
-        - asset: third_party/PressStart2P-Regular.ttf
+        - asset: third_party/VT323-Regular.ttf

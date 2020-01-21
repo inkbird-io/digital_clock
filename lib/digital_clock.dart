@@ -3,19 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/animation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vector_math/vector_math_64.dart' show radians;
-import 'package:flutter_gifimage/flutter_gifimage.dart';
-
-
 
 enum _Element {
   background,
@@ -25,29 +20,17 @@ enum _Element {
 
 final _lightTheme = {
   _Element.background: Colors.blue,
-  _Element.text: Colors.white,
-  _Element.shadow: Colors.black,
+  _Element.text: Colors.limeAccent,
 };
 
 final _darkTheme = {
   _Element.background: Colors.black,
   _Element.text: Colors.lightGreenAccent,
-  _Element.shadow: Color(0xFF174EA6),
 };
 
 final radiansPerTick = radians(360 / 60);
 final radiansPerHour = radians(360 / 12);
 
-var square = Container(
-  width: 100,
-  height: 100,
-  transform: Matrix4.identity(),
-  color: Colors.amber,
-);
-
-/// A basic digital clock.
-///
-/// You can do better than this!
 class DigitalClock extends StatefulWidget {
   const DigitalClock(this.model);
 
@@ -62,7 +45,6 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
   Timer _timer;
   AnimationController animationController;
   Animation<double> animation;
-//  GifController controller1 = GifController(vsync: );
 
   @override
   void initState() {
@@ -78,14 +60,12 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
       begin: 0,
       end: 12.5664
     ).animate(animationController);
-
     animationController.forward();
     animation.addStatusListener((status){
       if(status == AnimationStatus.completed){
         animationController.repeat();
       }
     });
-//    controller1 = GifController(vsync: this);
   }
 
   @override
@@ -114,21 +94,42 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
   void _updateTime() {
     setState(() {
       _dateTime = DateTime.now();
-      // Update once per minute. If you want to update every second, use the
-      // following code.
-//      _timer = Timer(
-//        Duration(minutes: 1) -
-//            Duration(seconds: _dateTime.second) -
-//            Duration(milliseconds: _dateTime.millisecond),
-//        _updateTime,
-//      );
-      // Update once per second, but make sure to do it at the beginning of each
-      // new second, so that the clock is accurate.
-       _timer = Timer(
-         Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
-         _updateTime,
-       );
+      _timer = Timer(
+        Duration(seconds: 1) - Duration(milliseconds: _dateTime.millisecond),
+        _updateTime,
+      );
     });
+  }
+
+  List<int> minutes = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+
+  AssetImage clockOutsideAnimation(){
+    if(_dateTime.minute == 0 && _dateTime.second > 0 && _dateTime.second < 18) {
+      // he is outside playing trumpet
+      // 5400 mls
+      return AssetImage("assets/inkman-hour-announcement-trumpet.gif");
+    }
+    return AssetImage("assets/clock_outside.png");
+  }
+
+  AssetImage insideAnimation(){
+    if(minutes.contains(_dateTime.minute) && _dateTime.second < 8) {
+      // every other five minutes he checks clock
+      return AssetImage("assets/inkman-look-clock.gif");
+    } else if (_dateTime.minute == 59 && _dateTime.second > 45 && _dateTime.second < 59){
+      // when hour hits sharp he goes out
+      // 8680 mls
+      return AssetImage("assets/inkman-hour-tick.gif");
+    } else if (_dateTime.minute == 0 && _dateTime.second > 0 && _dateTime.second < 18){
+      // once the clockoutsideanimation finishes, he will be back
+      return AssetImage("assets/props.png");
+    } else if (_dateTime.minute == 0 && _dateTime.second < 19 && _dateTime.second < 24) {
+      // the man comes back in
+      // 3160 mls
+      return AssetImage("assets/inkman-come-in.gif");
+    }
+    // otherwise he just sits and enjoys the newspaper
+    return AssetImage("assets/inkman-sit-idle-blink-2.gif");
   }
 
   @override
@@ -140,27 +141,19 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
         DateFormat(widget.model.is24HourFormat ? 'HH' : 'hh').format(_dateTime);
     final minute = DateFormat('mm').format(_dateTime);
     final second = DateFormat('ss').format(_dateTime);
-    final fontSize = MediaQuery.of(context).size.width / 50;
-//    final offset = -fontSize / 7;
+    final fontSize = MediaQuery.of(context).size.width / 40;
     final defaultStyle = TextStyle(
-//      color: colors[_Element.text],
-      color: Colors.lime,
+      color: colors[_Element.text],
+      fontFamily: 'VT323',
       fontSize: fontSize,
+    );
+    final smallTextStyle = TextStyle(
+      color: colors[_Element.text],
+      fontFamily: 'VT323',
+      fontSize: 20
     );
     final temp = widget.model.temperatureString;
     final weatherCondition = widget.model.weatherString;
-
-    AssetImage gifChoose(){
-      if(DateTime.now().minute == 05 && DateTime.now().second== 58) {
-        return AssetImage("assets/inkman-hour-tick.gif");
-      }
-      return AssetImage("assets/inkman-sit-idle.gif");
-    }
-
-//    animation.addListener((){
-//      square.transform = Matrix4.rotationZ(tween.evaluate(animation));
-//    });
-
 
     return Container(
       decoration: new BoxDecoration(
@@ -170,8 +163,9 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
       ),
       child: Stack(
         children: <Widget>[
+          // Clock outside animation when the clock hits hour
           Image(
-            image: AssetImage("assets/clock_outside.png"),
+            image: clockOutsideAnimation(),
           ),
           Image(
             image: AssetImage("assets/clock_face.png"),
@@ -193,50 +187,41 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
           Image(
             image: AssetImage("assets/deck.png"),
           ),
+          // Gear big top
+          Positioned(
+            top: -180, left: -180,
+            child: Transform.scale(
+              scale: 1.2,
+                child: Image.asset("assets/cog_large_lighter_350.png")
+            )
+          ),
+          // Gear small top
+          Positioned(
+            top: 100, left: -100,
+            child: Transform.scale(
+                scale: 1.2,
+              child: Transform.rotate(
+                angle: double.parse(second) * -300,
+                child: Image.asset("assets/cog_small_lighter_200.png")
+              )
+            ),
+          ),
+          // Pendilum
+          Positioned(
+            top: -270, right: -474,
+            child: Transform.scale(
+              scale: 0.5,
+              child: Image.asset("assets/pendilum.gif"),
+            ),
+          ),
           Image(
             image: AssetImage("assets/overlay_shadow.png"),
           ),
-          // Big clock
-          // Gear small top
-          Positioned(
-            top: -200, left: -400,
-            child: Transform.scale(
-              scale: 0.3,
-//              child: Transform.rotate(
-//                angle: double.parse(second) * -300,
-                child: Image.asset("assets/cog_small.png")
-//              )
-            ),
-          ),
-          Positioned(
-            top: -550, left: -500,
-            child: Transform.scale(
-              scale: 0.3,
-//              child: Transform.rotate(
-//                angle: double.parse(second) * 3,
-                child: Image.asset("assets/cog_large.png")
-//              ),
-            )
-          ),
-//           Pendilum
-          Positioned(
-            top: 0, right: 0,
-            child: Transform.scale(
-              scale: 1,
-              child: Image.asset("assets/pendilum.png"),
-            ),
-
-          ),
-          // Composition
-//          Image(
-//            image: AssetImage("assets/composition.jpg"),
-//          ),
           // Gears center
           Positioned(
               top: 430, left: 200,
               child: Container(
                 height: 130, width: 650,
-//                color: Colors.blue,
                 child: Stack(
                   children: <Widget>[
                     // Gear 1st
@@ -303,10 +288,8 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
           Image(
             image: AssetImage("assets/props.png"),
           ),
-          // Inkman animation
-          GifImage(
-            controller: GifController(vsync: this),
-            image: AssetImage("assets/inkman-hour-tick.gif"),
+          Image(
+            image: insideAnimation(),
           ),
           // Weather display
           Positioned(
@@ -319,16 +302,16 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
+                      DefaultTextStyle(
+                        style: smallTextStyle,
+                        child: Text(
                           '$temp',
-                          style: TextStyle(
-                              color: _darkTheme[_Element.text]
-                          )
+                        ),
                       ),
-                      Text(
-                        '$weatherCondition',
-                        style: TextStyle(
-                            color: _darkTheme[_Element.text]
+                      DefaultTextStyle(
+                        style: smallTextStyle,
+                        child: Text(
+                          '$weatherCondition',
                         ),
                       ),
                     ],
@@ -346,25 +329,15 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
                 child: DefaultTextStyle(
                   style: defaultStyle,
                   child: Text(
-                      '$hour:$minute:$second'
+                    '$hour:$minute:$second',
                   ),
                 ),
               ),
             ),
           ),
-          AnimatedBuilder(
-            animation: animationController,
-            builder: (context, child) => Transform.rotate(
-              angle: animation.value,
-              child: Icon(
-                  Icons.expand_more,
-                  size: 40,
-                  color: Colors.lightGreenAccent
-              ),
-            ),
-          )
         ],
       ),
     );
   }
 }
+
