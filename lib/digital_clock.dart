@@ -38,13 +38,6 @@ final _darkTheme = {
 final radiansPerTick = radians(360 / 60);
 final radiansPerHour = radians(360 / 12);
 
-final AnimationController animation = AnimationController(
-  duration: const Duration(milliseconds: 1800),
-  vsync: const NonStopVSync(),
-)..repeat();
-
-final Tween tween = Tween(begin: 0.0, end: math.pi);
-
 var square = Container(
   width: 100,
   height: 100,
@@ -178,6 +171,9 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
       child: Stack(
         children: <Widget>[
           Image(
+            image: AssetImage("assets/clock_outside.png"),
+          ),
+          Image(
             image: AssetImage("assets/clock_face.png"),
           ),
           // Hour handle
@@ -248,10 +244,13 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
                         top: 60, left: 0,
                         child: Transform.scale(
                           scale: 1,
-//                          child: Transform.rotate(
-//                              angle: double.parse(second) * 3,
+                          child: AnimatedBuilder(
+                            animation: animationController,
+                            builder: (context, child) => Transform.rotate(
+                              angle: animation.value,
                               child: Image.asset("assets/cog_small_200.png")
-//                          ),
+                            ),
+                          )
                         )
                     ),
                     // Gear 2nd
@@ -260,10 +259,13 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
                         left: 100,
                         child: Transform.scale(
                           scale: 0.7,
-//                          child: Transform.rotate(
-//                              angle: double.parse(second) * 3,
-                              child: Image.asset("assets/cog_large_350.png")
-//                          ),
+                          child: AnimatedBuilder(
+                            animation: animationController,
+                            builder: (context, child) => Transform.rotate(
+                                angle: animation.value / 4,
+                                child: Image.asset("assets/cog_large_350.png")
+                            ),
+                          )
                         )
                     ),
                     // Gear 3rd
@@ -271,10 +273,13 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
                         top: 35, left: 335,
                         child: Transform.scale(
                           scale: 0.85,
-//                          child: Transform.rotate(
-//                              angle: double.parse(second) * -3,
-                              child: Image.asset("assets/cog_small_200.png")
-//                          ),
+                          child: AnimatedBuilder(
+                            animation: animationController,
+                            builder: (context, child) => Transform.rotate(
+                                angle: animation.value / 2,
+                                child: Image.asset("assets/cog_small_200.png")
+                            ),
+                          )
                         )
                     ),
                     // Gear 4th
@@ -282,10 +287,13 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
                         top: 25, left: 460,
                         child: Transform.scale(
                           scale: 0.5,
-//                          child: Transform.rotate(
-//                              angle: double.parse(second) * -3,
-                              child: Image.asset("assets/cog_small_200.png")
-//                          ),
+                          child: AnimatedBuilder(
+                            animation: animationController,
+                            builder: (context, child) => Transform.rotate(
+                                angle: animation.value / 0.5,
+                                child: Image.asset("assets/cog_small_200.png")
+                            ),
+                          )
                         )
                     ),
                   ],
@@ -344,35 +352,19 @@ class _DigitalClockState extends State<DigitalClock> with TickerProviderStateMix
               ),
             ),
           ),
-          InfiniteAnimation(
-            durationInSeconds: 2,
-            child: Icon(
-              Icons.expand_more,
-              size: 40,
-              color: Colors.lightGreenAccent
+          AnimatedBuilder(
+            animation: animationController,
+            builder: (context, child) => Transform.rotate(
+              angle: animation.value,
+              child: Icon(
+                  Icons.expand_more,
+                  size: 40,
+                  color: Colors.lightGreenAccent
+              ),
             ),
           )
         ],
       ),
     );
   }
-}
-
-class NonStopVSync implements TickerProvider {
-  const NonStopVSync();
-  @override
-  Ticker createTicker(onTick) {
-    Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
-  }
-}
-
-class InfiniteAnimation extends StatefulWidget {
-  final Widget child;
-  final int durationInSeconds;
-
-  InfiniteAnimation({@required this.child, this.durationInSeconds = 2});
-
-  @override
-  _DigitalClockState createState() => _DigitalClockState();
-
 }
