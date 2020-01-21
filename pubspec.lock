@@ -76,11 +76,25 @@ packages:
       relative: true
     source: path
     version: "1.0.0+1"
+  flutter_gifimage:
+    dependency: "direct main"
+    description:
+      name: flutter_gifimage
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
+  gif_ani:
+    dependency: "direct main"
+    description:
+      name: gif_ani
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.2"
   image:
     dependency: transitive
     description:
